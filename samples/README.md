@@ -21,3 +21,4 @@ This directory contains the exported assets for the sample carousel:
 - `slide-07.png`: Slide 07 — Tip 5: Handling & temperament (Sand theme, Fear-Free handling)
 - `slide-08.png`: Slide 08 — Action CTA (Ink theme, brand handle, action pill)
 - `sample-carousel.pdf`: 8-page compiled document carousel ready for LinkedIn PDF uploads
+

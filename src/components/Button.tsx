@@ -13,9 +13,9 @@ const base =
   'inline-flex items-center justify-center gap-2 font-sans font-medium rounded-xl transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-hover',
+  primary: 'bg-accent text-white dark:text-[#151412] font-semibold hover:bg-accent-hover shadow-sm',
   secondary:
-    'border border-border text-text bg-transparent hover:bg-card',
+    'border border-border text-text bg-transparent hover:bg-card hover:text-text',
   ghost: 'text-muted hover:text-text hover:bg-card',
 }
 

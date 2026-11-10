@@ -10,6 +10,7 @@ interface SlidePreviewProps {
   className?: string
   innerRef?: Ref<HTMLDivElement>
   autoScale?: boolean
+  borderless?: boolean
 }
 
 const CANVAS_WIDTH = 1080
@@ -22,6 +23,7 @@ export function SlidePreview({
   className = '',
   innerRef,
   autoScale = true,
+  borderless = false,
 }: SlidePreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [dynamicScale, setDynamicScale] = useState<number>(fixedScale || 0.35)
@@ -29,12 +31,7 @@ export function SlidePreview({
   const canvasHeight = aspectRatio === '1:1' ? 1080 : 1350
 
   useEffect(() => {
-    if (fixedScale) {
-      setDynamicScale(fixedScale)
-      return
-    }
-
-    if (!autoScale || !containerRef.current) return
+    if (fixedScale || !autoScale || !containerRef.current) return
 
     const updateScale = () => {
       if (!containerRef.current) return
@@ -60,7 +57,9 @@ export function SlidePreview({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden rounded-2xl shadow-sm border border-border/80 transition-all duration-200 ${className}`}
+      className={`relative overflow-hidden rounded-2xl transition-all duration-200 ${
+        borderless ? '' : 'shadow-sm border border-border/80'
+      } ${className}`}
       style={{
         width: '100%',
         maxWidth: fixedScale ? `${CANVAS_WIDTH * fixedScale}px` : undefined,

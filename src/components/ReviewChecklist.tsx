@@ -152,14 +152,23 @@ export function ReviewChecklist({
       </p>
 
       {/* Checklist items */}
-      <div className="space-y-2 pt-1">
+      <div className="space-y-2 pt-1" role="group" aria-label="Quality checklist items">
         {defaultItems.map((item) => {
           const isChecked = Boolean(checkedIds[item.id])
           return (
-            <button
+            <div
               key={item.id}
+              role="checkbox"
+              aria-checked={isChecked}
+              tabIndex={0}
               onClick={() => handleToggle(item.id)}
-              className={`flex w-full items-start gap-3 p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault()
+                  handleToggle(item.id)
+                }
+              }}
+              className={`flex w-full items-start gap-3 p-2.5 rounded-xl border text-left transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent select-none ${
                 isChecked
                   ? 'border-accent/40 bg-accent/5'
                   : 'border-border/70 bg-surface hover:border-accent/30'
@@ -167,9 +176,9 @@ export function ReviewChecklist({
             >
               <div className="mt-0.5 text-accent shrink-0">
                 {isChecked ? (
-                  <CheckCircle2 className="h-4 w-4 fill-accent text-white dark:text-[#1C1B19]" />
+                  <CheckCircle2 className="h-4 w-4 fill-accent text-white dark:text-[#1C1B19]" aria-hidden="true" />
                 ) : (
-                  <Circle className="h-4 w-4 text-muted" />
+                  <Circle className="h-4 w-4 text-muted" aria-hidden="true" />
                 )}
               </div>
               <div className="space-y-0.5 text-xs">
@@ -182,7 +191,7 @@ export function ReviewChecklist({
                 </span>
                 <p className="text-[11px] text-muted leading-tight">{item.description}</p>
               </div>
-            </button>
+            </div>
           )
         })}
       </div>

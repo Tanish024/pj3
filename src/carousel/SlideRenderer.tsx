@@ -17,28 +17,28 @@ export const SlideRenderer = forwardRef<HTMLDivElement, SlideRendererProps>(
     const isSquare = aspectRatio === '1:1'
     const isLastSlide = slide.index === totalSlides
 
-    // Theme color mappings specifically tuned for high-resolution canvas rendering
+    // Theme color mappings specifically tuned for high-resolution canvas rendering & WCAG AA contrast
     let bgStyle = '#F6F1E7'
     let textStyle = '#1C1B19'
-    let mutedStyle = '#6E675B'
+    let mutedStyle = '#5A5348'
     let borderStyle = '#DDD2BF'
-    let accentStyle = '#D9633B'
+    let accentStyle = '#C04E27'
     let cardBgStyle = '#FFFBF3'
 
     if (isInk) {
       bgStyle = '#1C1B19'
       textStyle = '#F1EBDF'
-      mutedStyle = '#A29A8B'
+      mutedStyle = '#ABA293'
       borderStyle = '#34302A'
       accentStyle = '#E8794F'
       cardBgStyle = '#26231F'
     } else if (isTerracotta) {
-      bgStyle = '#D9633B'
+      bgStyle = '#C04E27'
       textStyle = '#FFFBF3'
       mutedStyle = '#FBECE7'
       borderStyle = 'rgba(255, 255, 255, 0.25)'
       accentStyle = '#FFFBF3'
-      cardBgStyle = '#C4552F'
+      cardBgStyle = '#A73F1C'
     }
 
     const canvasWidth = 1080
@@ -96,12 +96,12 @@ export const SlideRenderer = forwardRef<HTMLDivElement, SlideRendererProps>(
                 <div
                   className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-[19px] font-medium"
                   style={{
-                    backgroundColor: isTerracotta ? '#C4552F' : isInk ? '#26231F' : '#E9DFCF',
+                    backgroundColor: isTerracotta ? '#A73F1C' : isInk ? '#26231F' : '#E9DFCF',
                     color: isTerracotta ? '#FFFBF3' : accentStyle,
                     border: `1px solid ${borderStyle}`,
                   }}
                 >
-                  Essential Vet Guide
+                  {slide.tag || 'Care Guide'}
                 </div>
 
                 <div className="relative">
@@ -113,18 +113,44 @@ export const SlideRenderer = forwardRef<HTMLDivElement, SlideRendererProps>(
                     }`}
                     style={{ fontFamily: "'Fraunces', serif" }}
                   >
-                    Choosing a vet?
-                    <br />
-                    <span className="relative inline-block mt-2">
-                      Check these 5 things first.
-                      {/* Terracotta / accent underline */}
-                      <span
-                        className="absolute -bottom-3 left-0 h-[6px] w-full rounded-full"
-                        style={{
-                          backgroundColor: isTerracotta ? '#FFFBF3' : accentStyle,
-                        }}
-                      />
-                    </span>
+                    {slide.headline.includes('<br') ? (
+                      <span dangerouslySetInnerHTML={{ __html: slide.headline }} />
+                    ) : slide.headline.includes('?') ? (
+                      (() => {
+                        const qIndex = slide.headline.indexOf('?')
+                        const firstPart = slide.headline.slice(0, qIndex + 1)
+                        const secondPart = slide.headline.slice(qIndex + 1).trim()
+                        return (
+                          <>
+                            {firstPart}
+                            {secondPart && (
+                              <>
+                                <br />
+                                <span className="relative inline-block mt-2">
+                                  {secondPart}
+                                  <span
+                                    className="absolute -bottom-3 left-0 h-[6px] w-full rounded-full"
+                                    style={{
+                                      backgroundColor: isTerracotta ? '#FFFBF3' : accentStyle,
+                                    }}
+                                  />
+                                </span>
+                              </>
+                            )}
+                          </>
+                        )
+                      })()
+                    ) : (
+                      <>
+                        <span>{slide.headline}</span>
+                        <span
+                          className="block h-[6px] w-[160px] rounded-full mt-3"
+                          style={{
+                            backgroundColor: isTerracotta ? '#FFFBF3' : accentStyle,
+                          }}
+                        />
+                      </>
+                    )}
                   </h1>
                 </div>
               </div>
@@ -166,7 +192,7 @@ export const SlideRenderer = forwardRef<HTMLDivElement, SlideRendererProps>(
                     fontFamily: "'Fraunces', serif",
                   }}
                 >
-                  The common pitfall
+                  {slide.subhead || 'The common pitfall'}
                 </span>
                 <h2
                   className={`font-serif font-semibold tracking-[-0.02em] ${
@@ -294,12 +320,12 @@ export const SlideRenderer = forwardRef<HTMLDivElement, SlideRendererProps>(
               {/* Terracotta Button-style Action Pill */}
               <div className="pt-2">
                 <div
-                  className={`inline-flex items-center justify-center rounded-2xl font-medium tracking-wide shadow-lg cursor-pointer ${
+                  className={`inline-flex items-center justify-center rounded-2xl font-semibold tracking-wide shadow-lg ${
                     isSquare ? 'px-10 py-4 text-[26px]' : 'px-12 py-6 text-[30px]'
                   }`}
                   style={{
                     backgroundColor: isTerracotta ? '#FFFBF3' : accentStyle,
-                    color: isTerracotta ? '#D9633B' : '#FFFFFF',
+                    color: isTerracotta ? '#C04E27' : '#FFFFFF',
                   }}
                 >
                   {slide.ctaLabel || 'Find trusted vets near you'}

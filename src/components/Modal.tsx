@@ -43,6 +43,9 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
           }}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? 'modal-title' : undefined}
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
@@ -54,11 +57,11 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
           >
             {title && (
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-serif text-xl font-semibold text-text">{title}</h2>
+                <h2 id="modal-title" className="font-serif text-xl font-semibold text-text">{title}</h2>
                 <button
                   onClick={onClose}
                   className="rounded-lg p-1 text-muted hover:text-text transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 cursor-pointer"
-                  aria-label="Close"
+                  aria-label="Close dialog"
                 >
                   <X className="h-5 w-5" />
                 </button>

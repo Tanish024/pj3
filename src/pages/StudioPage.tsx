@@ -132,20 +132,16 @@ export default function StudioPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationStep, setGenerationStep] = useState<number | null>(null)
 
-  // Captions state
+  // Captions state derived from current slides
   const generatedCaptions = useMemo(
     () => generateCaptions(slides, '5 Things to Check Before Choosing a Vet for Your Pet'),
     [slides],
   )
-  const [igCaption, setIgCaption] = useState(generatedCaptions.instagram)
-  const [linkedInPost, setLinkedInPost] = useState(generatedCaptions.linkedin)
+  const [customIgCaption, setCustomIgCaption] = useState<string | null>(null)
+  const [customLinkedInPost, setCustomLinkedInPost] = useState<string | null>(null)
+  const igCaption = customIgCaption ?? generatedCaptions.instagram
+  const linkedInPost = customLinkedInPost ?? generatedCaptions.linkedin
   const [copiedCaption, setCopiedCaption] = useState<'ig' | 'li' | null>(null)
-
-  // Update captions when slides change unless manually modified
-  useEffect(() => {
-    setIgCaption(generatedCaptions.instagram)
-    setLinkedInPost(generatedCaptions.linkedin)
-  }, [generatedCaptions])
 
   // Collapsible cards state
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
@@ -543,46 +539,52 @@ export default function StudioPage() {
         {/* Action Controls: Undo/Redo, Aspect, Review, Schedule, Export */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Undo / Redo */}
-          <div className="inline-flex rounded-xl border border-border p-1 bg-surface">
+          <div className="inline-flex rounded-xl border border-border p-1 bg-surface" role="group" aria-label="History actions">
             <button
               onClick={handleUndo}
               disabled={historyIndex === 0}
-              className="p-1.5 rounded-lg text-muted hover:text-text disabled:opacity-40 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-muted hover:text-text disabled:opacity-40 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
+              aria-label="Undo edit (Ctrl+Z)"
               title="Undo (Ctrl+Z)"
             >
-              <Undo2 className="h-4 w-4" />
+              <Undo2 className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
-              className="p-1.5 rounded-lg text-muted hover:text-text disabled:opacity-40 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-muted hover:text-text disabled:opacity-40 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
+              aria-label="Redo edit (Ctrl+Y)"
               title="Redo (Ctrl+Y)"
             >
-              <Redo2 className="h-4 w-4" />
+              <Redo2 className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
 
           {/* Aspect Ratio Selector */}
-          <div className="inline-flex rounded-xl border border-border p-1 bg-surface">
+          <div className="inline-flex rounded-xl border border-border p-1 bg-surface" role="group" aria-label="Aspect ratio selection">
             <button
               onClick={() => setAspectRatio('4:5')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              aria-pressed={aspectRatio === '4:5'}
+              aria-label="Set 4:5 portrait format (1080 by 1350)"
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent ${
                 aspectRatio === '4:5'
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'bg-accent text-white dark:text-[#151412] font-semibold shadow-xs'
                   : 'text-muted hover:text-text'
               }`}
             >
-              <Ratio className="h-3.5 w-3.5" /> 4:5
+              <Ratio className="h-3.5 w-3.5" aria-hidden="true" /> 4:5
             </button>
             <button
               onClick={() => setAspectRatio('1:1')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              aria-pressed={aspectRatio === '1:1'}
+              aria-label="Set 1:1 square format (1080 by 1080)"
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent ${
                 aspectRatio === '1:1'
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'bg-accent text-white dark:text-[#151412] font-semibold shadow-xs'
                   : 'text-muted hover:text-text'
               }`}
             >
-              <Ratio className="h-3.5 w-3.5" /> 1:1
+              <Ratio className="h-3.5 w-3.5" aria-hidden="true" /> 1:1
             </button>
           </div>
 
@@ -591,9 +593,10 @@ export default function StudioPage() {
             variant="secondary"
             size="sm"
             onClick={() => setScheduleModalOpen(true)}
+            aria-label="Open publication scheduling modal"
             className="text-xs"
           >
-            <Calendar className="h-3.5 w-3.5" />
+            <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
             {activeSchedule ? 'Scheduled' : 'Schedule'}
           </Button>
 
@@ -603,52 +606,62 @@ export default function StudioPage() {
               size="sm"
               disabled={!isExportReady || isExporting}
               onClick={() => setExportOpen((prev) => !prev)}
-              className="text-xs shadow-sm"
+              aria-haspopup="menu"
+              aria-expanded={exportOpen}
+              aria-label="Export carousel options menu"
+              className="text-xs shadow-xs"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Exporting...
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> Exporting...
                 </>
               ) : (
                 <>
-                  <Download className="h-3.5 w-3.5" /> Export
-                  <ChevronDown className="h-3 w-3 -mr-1" />
+                  <Download className="h-3.5 w-3.5" aria-hidden="true" /> Export
+                  <ChevronDown className="h-3 w-3 -mr-1" aria-hidden="true" />
                 </>
               )}
             </Button>
 
             {/* Dropdown Menu Items */}
             {exportOpen && isExportReady && (
-              <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-border bg-surface p-2 shadow-xl z-50 space-y-1">
+              <div
+                role="menu"
+                aria-label="Export formats"
+                className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-border bg-surface p-2 shadow-xl z-50 space-y-1"
+              >
                 <button
+                  role="menuitem"
                   onClick={handleExportCurrentPng}
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer"
+                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
                 >
-                  <ImageIcon className="h-4 w-4 text-accent" />
+                  <ImageIcon className="h-4 w-4 text-accent shrink-0" aria-hidden="true" />
                   <div>
-                    <p className="text-text">Current Slide (PNG)</p>
+                    <p className="text-text font-semibold">Current Slide (PNG)</p>
                     <span className="text-[11px] text-muted">Slide 0{currentIndex + 1} at 1080 resolution</span>
                   </div>
                 </button>
 
                 <button
+                  role="menuitem"
                   onClick={handleExportAllZip}
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer"
+                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
                 >
-                  <FileArchive className="h-4 w-4 text-accent" />
+                  <FileArchive className="h-4 w-4 text-accent shrink-0" aria-hidden="true" />
                   <div>
-                    <p className="text-text">All Slides (ZIP of PNGs)</p>
+                    <p className="text-text font-semibold">All Slides (ZIP of PNGs)</p>
                     <span className="text-[11px] text-muted">All {slides.length} slides packaged</span>
                   </div>
                 </button>
 
                 <button
+                  role="menuitem"
                   onClick={handleExportPdf}
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer border-t border-border/60"
+                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-card text-left text-xs font-medium text-text transition-colors cursor-pointer border-t border-border/60 focus-visible:outline-2 focus-visible:outline-accent"
                 >
-                  <FileText className="h-4 w-4 text-accent" />
+                  <FileText className="h-4 w-4 text-accent shrink-0" aria-hidden="true" />
                   <div>
-                    <p className="text-text">LinkedIn Carousel (PDF)</p>
+                    <p className="text-text font-semibold">LinkedIn Carousel (PDF)</p>
                     <span className="text-[11px] text-muted">Multi-page document carousel</span>
                   </div>
                 </button>
@@ -703,14 +716,16 @@ export default function StudioPage() {
       )}
 
       {/* Mobile Tab Navigation */}
-      <div className="flex lg:hidden border-b border-border overflow-x-auto">
+      <div className="flex lg:hidden border-b border-border overflow-x-auto" role="tablist" aria-label="Mobile workspace sections">
         {(['preview', 'idea', 'edit', 'captions', 'review'] as MobileTab[]).map((tab) => (
           <button
             key={tab}
+            role="tab"
+            aria-selected={mobileTab === tab}
             onClick={() => setMobileTab(tab)}
-            className={`flex-1 min-w-[70px] py-2.5 text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer border-b-2 -mb-px text-center ${
+            className={`flex-1 min-w-[70px] py-2.5 text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer border-b-2 -mb-px text-center focus-visible:outline-2 focus-visible:outline-accent ${
               mobileTab === tab
-                ? 'border-accent text-accent'
+                ? 'border-accent text-accent font-semibold'
                 : 'border-transparent text-muted hover:text-text'
             }`}
           >
@@ -827,7 +842,7 @@ export default function StudioPage() {
                   <Textarea
                     rows={4}
                     value={igCaption}
-                    onChange={(e) => setIgCaption(e.target.value)}
+                    onChange={(e) => setCustomIgCaption(e.target.value)}
                     className="text-xs font-mono"
                   />
                 </div>
@@ -856,7 +871,7 @@ export default function StudioPage() {
                   <Textarea
                     rows={4}
                     value={linkedInPost}
-                    onChange={(e) => setLinkedInPost(e.target.value)}
+                    onChange={(e) => setCustomLinkedInPost(e.target.value)}
                     className="text-xs font-mono"
                   />
                 </div>
@@ -1022,22 +1037,24 @@ export default function StudioPage() {
                 slide={currentSlide}
                 totalSlides={totalSlides}
                 aspectRatio={aspectRatio}
+                borderless={true}
               />
             </div>
 
             {/* Stage Controls: Next / Prev / Counter */}
-            <div className="flex items-center justify-between w-full px-2">
+            <div className="flex items-center justify-between w-full px-2" role="group" aria-label="Slide controls">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
+                aria-label="Previous slide"
               >
-                <ChevronLeft className="h-4 w-4" /> Previous
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Previous
               </Button>
 
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-semibold text-text">
+                <span className="font-mono text-xs font-semibold text-text" aria-live="polite">
                   {currentIndex + 1} / {totalSlides}
                 </span>
                 <span
@@ -1045,7 +1062,7 @@ export default function StudioPage() {
                     currentSlide.theme === 'ink'
                       ? 'bg-[#1C1B19] text-[#F1EBDF] border border-[#34302A]'
                       : currentSlide.theme === 'terracotta'
-                      ? 'bg-[#D9633B] text-white border border-[#C4552F]'
+                      ? 'bg-[#C04E27] text-white border border-[#A73F1C]'
                       : 'bg-[#F6F1E7] text-[#1C1B19] border border-[#DDD2BF]'
                   }`}
                 >
@@ -1057,8 +1074,9 @@ export default function StudioPage() {
                 size="sm"
                 onClick={handleNext}
                 disabled={currentIndex === totalSlides - 1}
+                aria-label="Next slide"
               >
-                Next <ChevronRight className="h-4 w-4" />
+                Next <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -1072,26 +1090,31 @@ export default function StudioPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleResetSample}
-                  className="inline-flex items-center gap-1 text-xs text-muted hover:text-text cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs text-muted hover:text-text cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
                   title="Reset to original 8-slide vet sample"
+                  aria-label="Reset to original 8-slide sample carousel"
                 >
-                  <RotateCcw className="h-3 w-3" /> Reset Sample
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" /> Reset Sample
                 </button>
                 <button
                   onClick={handleAddSlide}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
+                  aria-label="Add new slide"
                 >
-                  <Plus className="h-3.5 w-3.5" /> Add Slide
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" /> Add Slide
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 w-full">
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 w-full" role="tablist" aria-label="Slide thumbnail strip">
               {slides.map((s, idx) => (
                 <button
                   key={s.id}
+                  role="tab"
+                  aria-selected={currentIndex === idx}
+                  aria-label={`Select slide 0${s.index}: ${s.headline}`}
                   onClick={() => setCurrentIndex(idx)}
-                  className={`group relative text-left rounded-xl overflow-hidden border p-1 transition-all duration-200 cursor-pointer ${
+                  className={`group relative text-left rounded-xl overflow-hidden border p-1 transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-accent ${
                     currentIndex === idx
                       ? 'border-accent ring-2 ring-accent/30 bg-card shadow-sm'
                       : 'border-border hover:border-accent/50 bg-surface'
@@ -1103,6 +1126,7 @@ export default function StudioPage() {
                       totalSlides={totalSlides}
                       aspectRatio={aspectRatio}
                       autoScale={true}
+                      borderless={true}
                     />
                   </div>
                   <div className="mt-1 px-1 flex items-center justify-between text-[10px] font-mono text-muted">
@@ -1215,6 +1239,8 @@ export default function StudioPage() {
 
             {/* Word Count Indicator & Warning */}
             <div
+              role="status"
+              aria-live="polite"
               className={`rounded-xl p-3 border text-xs space-y-1 ${
                 isOverLimit
                   ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400'
@@ -1229,14 +1255,14 @@ export default function StudioPage() {
               </div>
               {isOverLimit ? (
                 <p className="flex items-start gap-1.5 pt-1 text-[11px] leading-tight font-medium">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" aria-hidden="true" />
                   <span>
                     Warning: Exceeds 25 words limit. Warm Editorial guidelines recommend brevity for optimal pacing.
                   </span>
                 </p>
               ) : (
                 <p className="flex items-center gap-1.5 pt-1 text-[11px] text-accent">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   <span>Optimal editorial density ({25 - totalWords} words remaining).</span>
                 </p>
               )}
@@ -1252,18 +1278,20 @@ export default function StudioPage() {
                   size="sm"
                   onClick={handleMoveUp}
                   disabled={currentIndex === 0}
+                  aria-label="Move current slide earlier in order"
                   className="w-full text-xs"
                 >
-                  <ArrowUp className="h-3.5 w-3.5" /> Move Up
+                  <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" /> Move Up
                 </Button>
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={handleMoveDown}
                   disabled={currentIndex === totalSlides - 1}
+                  aria-label="Move current slide later in order"
                   className="w-full text-xs"
                 >
-                  <ArrowDown className="h-3.5 w-3.5" /> Move Down
+                  <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" /> Move Down
                 </Button>
               </div>
 
@@ -1272,18 +1300,20 @@ export default function StudioPage() {
                   variant="secondary"
                   size="sm"
                   onClick={handleDuplicate}
+                  aria-label="Duplicate current slide"
                   className="w-full text-xs"
                 >
-                  <Copy className="h-3.5 w-3.5" /> Duplicate
+                  <Copy className="h-3.5 w-3.5" aria-hidden="true" /> Duplicate
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleDelete}
                   disabled={slides.length <= 1}
+                  aria-label="Delete current slide"
                   className="w-full text-xs text-red-600 dark:text-red-400 hover:bg-red-500/10"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> Delete
                 </Button>
               </div>
             </div>

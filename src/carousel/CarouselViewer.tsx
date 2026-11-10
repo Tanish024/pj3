@@ -47,26 +47,30 @@ export function CarouselViewer({ deck, className = '' }: CarouselViewerProps) {
 
         {/* Controls */}
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl border border-border p-1 bg-surface">
+          <div className="inline-flex rounded-xl border border-border p-1 bg-surface" role="tablist" aria-label="Viewer layout modes">
             <button
+              role="tab"
+              aria-selected={viewMode === 'single'}
               onClick={() => setViewMode('single')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent ${
                 viewMode === 'single'
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'bg-accent text-white dark:text-[#151412] font-semibold shadow-xs'
                   : 'text-muted hover:text-text'
               }`}
             >
-              <Square className="h-3.5 w-3.5" /> Single
+              <Square className="h-3.5 w-3.5" aria-hidden="true" /> Single
             </button>
             <button
+              role="tab"
+              aria-selected={viewMode === 'grid'}
               onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent ${
                 viewMode === 'grid'
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'bg-accent text-white dark:text-[#151412] font-semibold shadow-xs'
                   : 'text-muted hover:text-text'
               }`}
             >
-              <LayoutGrid className="h-3.5 w-3.5" /> All Slides
+              <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" /> All Slides
             </button>
           </div>
         </div>

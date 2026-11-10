@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Select } from './Select'
@@ -43,28 +43,20 @@ export function ScheduleModal({
     return d.toISOString().split('T')[0]
   }
 
-  const [date, setDate] = useState(getTomorrowDate)
-  const [time, setTime] = useState('10:00')
-  const [platform, setPlatform] = useState('both')
-  const [notes, setNotes] = useState('Morning high-engagement editorial drop')
-  const [existingSchedule, setExistingSchedule] = useState<ScheduleData | null>(null)
-
-  // Load existing schedule from localStorage on mount
-  useEffect(() => {
+  const getSavedSchedule = (): ScheduleData | null => {
     try {
       const stored = localStorage.getItem(SCHEDULE_STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as ScheduleData
-        setExistingSchedule(parsed)
-        setDate(parsed.date)
-        setTime(parsed.time)
-        setPlatform(parsed.platform)
-        setNotes(parsed.notes)
-      }
+      return stored ? (JSON.parse(stored) as ScheduleData) : null
     } catch {
-      // ignore
+      return null
     }
-  }, [open])
+  }
+
+  const [existingSchedule, setExistingSchedule] = useState<ScheduleData | null>(getSavedSchedule)
+  const [date, setDate] = useState(() => existingSchedule?.date || getTomorrowDate())
+  const [time, setTime] = useState(() => existingSchedule?.time || '10:00')
+  const [platform, setPlatform] = useState(() => existingSchedule?.platform || 'both')
+  const [notes, setNotes] = useState(() => existingSchedule?.notes || 'Morning high-engagement editorial drop')
 
   const handleSave = () => {
     const newSchedule: ScheduleData = {
@@ -139,8 +131,9 @@ export function ScheduleModal({
         {/* Schedule Form */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text">Target Date</label>
+            <label htmlFor="sched-date" className="text-xs font-medium text-text">Target Date</label>
             <input
+              id="sched-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -149,8 +142,9 @@ export function ScheduleModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text">Target Time</label>
+            <label htmlFor="sched-time" className="text-xs font-medium text-text">Target Time</label>
             <input
+              id="sched-time"
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
